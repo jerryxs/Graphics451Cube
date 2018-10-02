@@ -1,0 +1,92 @@
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Sectional Project 1</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+<script src='https://threejs.org/build/three.js'></script>
+		<!--script src="js/Three.js" type="module"></script-->
+		<script>
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+			var material = new THREE.MeshBasicMaterial( { color: 0xff69b4 } );
+			var cube = new THREE.Mesh( geometry, material );
+			scene.add( cube );
+
+			camera.position.z = 5;
+			var shrinkFlag = 1;
+			var translateFlag = 1;
+			var shearNegateFlag = 1;
+
+			var Sxy = 0.3;
+			var Sxz = 0.3;
+			var Syz = 0.3;
+			var Szx = 0.3;
+			var Syx = 0.3;
+			var Szy = 0.3;
+
+			var shearMatrix = new THREE.Matrix4();
+			shearMatrix.set(   1,   Syx,  Szx,  0,
+            				Sxy,     1,  Szy,  0,
+            				Sxz,   Syz,   1,   0,
+              				0,     0,   0,   1  );
+			var Snxy = 0;
+			var Snxz = 0;
+			var Snyz = 0;
+			var Snzx = 0;
+			var Snyx = 0;
+			var Snzy = 0;
+
+			var shearNegateMatrix = new THREE.Matrix4();
+			shearNegateMatrix.set(   1,   Snyx,  Snzx,  0,
+            				Snxy,     1,  Snzy,  0,
+            				Snxz,   Snyz,   1,   0,
+              				0,     0,   0,   1  );
+
+			cube.position.x = -5;
+
+			var animate = function () {
+				requestAnimationFrame( animate );
+
+				cube.rotation.x += 0.01;
+				cube.rotation.y += 0.01;
+				//scaling and mirroring, use flag to scale back and forth
+				if(cube.scale.x > 4 || cube.scale.x < 1){
+					shrinkFlag *= -1;
+					
+					//mirror the cube
+					cube.position.x *= -1;
+				}
+				
+				cube.scale.x += 0.01 * shrinkFlag;
+				cube.scale.y += 0.01 * shrinkFlag;
+				cube.scale.z += 0.01 * shrinkFlag;
+
+
+				//translating, use flag to translate 
+				if(cube.position.y > 2 || cube.position.y < -2){
+					translateFlag *= -1;
+
+					cube.applyMatrix((shearNegateFlag)?shearNegateMatrix:shearMatrix);
+					shearNegateFlag *= -1;				
+				}
+
+				cube.position.y += 0.01 * translateFlag;
+
+				renderer.render( scene, camera );
+			};
+
+			animate();
+		</script>
+	</body>
+</html>
